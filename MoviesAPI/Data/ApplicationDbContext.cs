@@ -17,17 +17,17 @@ namespace MoviesAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<MoviesGenres>().HasKey(x => new {x.GenreId, x.MovieId});
-            modelBuilder.Entity<MoviesActors>().HasKey(x => new {x.PersonId, x.MovieId});
+            modelBuilder.Entity<MoviesGenres>().HasKey(x => new { x.GenreId, x.MovieId });
+            modelBuilder.Entity<MoviesActors>().HasKey(x => new { x.PersonId, x.MovieId });
 
             SeedData(modelBuilder);
-             
+
             base.OnModelCreating(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)
         {
-            var geometryFactory= NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
             modelBuilder.Entity<MovieTheater>()
                 .HasData(new List<MovieTheater>

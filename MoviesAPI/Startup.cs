@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -100,6 +101,8 @@ namespace MoviesAPI
             services.AddAutoMapper(typeof(Startup));
             services.AddTransient<IFileStorageService, AzureStorageService>();
             services.AddTransient<IHostedService, MoviesInTheatersService>();
+            services.AddApplicationInsightsTelemetry();
+            services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>(tags: new[] {"ready"});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,6 +131,20 @@ namespace MoviesAPI
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions 
+                {
+                    ResponseWriter = HealthCheckResponseWriter.WriteResponseReadiness,
+                    Predicate = (check) => check.Tags.Contains("ready")
+                });
+                endpoints.MapHealthChecks("/health/live", new HealthCheckOptions 
+                {
+                    ResponseWriter = HealthCheckResponseWriter.WriteResponseLiveness,
+                    Predicate = (check) => !check.Tags.Contains("ready")
+                });
+            });
 
             app.UseEndpoints(endpoints =>
             {
